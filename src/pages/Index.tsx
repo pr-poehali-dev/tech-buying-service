@@ -48,24 +48,29 @@ const SEND_LEAD_URL = "https://functions.poehali.dev/52666ff7-db52-4b6a-a90e-d60
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", phone: "", category: "", desc: "" });
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [photoBase64, setPhotoBase64] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<{ preview: string; base64: string }[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    const remaining = 5 - photos.length;
+    const toAdd = files.slice(0, remaining);
+    toAdd.forEach(file => {
       const reader = new FileReader();
       reader.onload = ev => {
         const result = ev.target?.result as string;
-        setPhotoPreview(result);
-        setPhotoBase64(result.split(',')[1]);
+        setPhotos(prev => prev.length < 5 ? [...prev, { preview: result, base64: result.split(',')[1] }] : prev);
       };
       reader.readAsDataURL(file);
-    }
+    });
+    e.target.value = "";
+  };
+
+  const removePhoto = (idx: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,7 +81,7 @@ const Index = () => {
       const res = await fetch(SEND_LEAD_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, photo: photoBase64 }),
+        body: JSON.stringify({ ...formData, photos: photos.map(p => p.base64) }),
       });
       if (!res.ok) throw new Error("Ошибка отправки");
       setSubmitted(true);
@@ -251,19 +256,31 @@ const Index = () => {
                   </div>
 
                   <div>
-                    <label className="font-roboto text-white/50 text-xs uppercase tracking-wider block mb-1">Фото товара</label>
-                    <div onClick={() => fileRef.current?.click()}
-                      className="border-2 border-dashed border-[#333] hover:border-[#FFD700] transition-colors cursor-pointer p-4 flex items-center justify-center gap-3 min-h-[80px]">
-                      {photoPreview ? (
-                        <img src={photoPreview} alt="preview" className="h-16 w-auto object-contain" />
-                      ) : (
-                        <>
-                          <Icon name="Upload" size={20} className="text-[#FFD700]" />
-                          <span className="font-roboto text-white/50 text-sm">Загрузить фото</span>
-                        </>
+                    <label className="font-roboto text-white/50 text-xs uppercase tracking-wider block mb-1">
+                      Фото товара <span className="text-[#FFD700]">{photos.length}/5</span>
+                    </label>
+                    <div className="grid grid-cols-5 gap-2 mb-2">
+                      {photos.map((p, idx) => (
+                        <div key={idx} className="relative group aspect-square">
+                          <img src={p.preview} alt={`фото ${idx + 1}`} className="w-full h-full object-cover border border-[#333]" />
+                          <button type="button" onClick={() => removePhoto(idx)}
+                            className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Icon name="X" size={10} />
+                          </button>
+                        </div>
+                      ))}
+                      {photos.length < 5 && (
+                        <div onClick={() => fileRef.current?.click()}
+                          className="aspect-square border-2 border-dashed border-[#333] hover:border-[#FFD700] transition-colors cursor-pointer flex flex-col items-center justify-center gap-1">
+                          <Icon name="Plus" size={18} className="text-[#FFD700]" />
+                          <span className="font-roboto text-white/40 text-[10px]">фото</span>
+                        </div>
                       )}
-                      <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
                     </div>
+                    {photos.length === 0 && (
+                      <p className="font-roboto text-white/30 text-xs">До 5 фотографий</p>
+                    )}
+                    <input ref={fileRef} type="file" accept="image/*" multiple onChange={handlePhoto} className="hidden" />
                   </div>
 
                   {error && (

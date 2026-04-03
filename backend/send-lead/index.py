@@ -21,7 +21,7 @@ def handler(event: dict, context) -> dict:
     phone = body.get('phone', '').strip()
     category = body.get('category', '').strip()
     desc = body.get('desc', '').strip()
-    photo_b64 = body.get('photo')
+    photo_b64 = body.get('photo')  # обратная совместимость
 
     if not name or not phone:
         return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': 'Имя и телефон обязательны'})}
@@ -38,14 +38,34 @@ def handler(event: dict, context) -> dict:
         f"📝 *Описание:* {desc or '—'}"
     )
 
-    if photo_b64:
-        photo_bytes = base64.b64decode(photo_b64)
-        resp = requests.post(
-            f'{tg_url}/sendPhoto',
-            data={'chat_id': chat_id, 'caption': caption, 'parse_mode': 'Markdown'},
-            files={'photo': ('photo.jpg', photo_bytes, 'image/jpeg')},
-            timeout=30
-        )
+    photos_b64 = body.get('photos') or ([photo_b64] if photo_b64 else [])
+
+    if photos_b64:
+        if len(photos_b64) == 1:
+            photo_bytes = base64.b64decode(photos_b64[0])
+            resp = requests.post(
+                f'{tg_url}/sendPhoto',
+                data={'chat_id': chat_id, 'caption': caption, 'parse_mode': 'Markdown'},
+                files={'photo': ('photo.jpg', photo_bytes, 'image/jpeg')},
+                timeout=30
+            )
+        else:
+            media = []
+            files_dict = {}
+            for i, b64 in enumerate(photos_b64[:5]):
+                key = f'photo{i}'
+                files_dict[key] = (f'{key}.jpg', base64.b64decode(b64), 'image/jpeg')
+                item = {'type': 'photo', 'media': f'attach://{key}'}
+                if i == 0:
+                    item['caption'] = caption
+                    item['parse_mode'] = 'Markdown'
+                media.append(item)
+            resp = requests.post(
+                f'{tg_url}/sendMediaGroup',
+                data={'chat_id': chat_id, 'media': json.dumps(media)},
+                files=files_dict,
+                timeout=60
+            )
     else:
         resp = requests.post(
             f'{tg_url}/sendMessage',
