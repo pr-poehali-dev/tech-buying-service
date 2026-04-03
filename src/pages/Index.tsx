@@ -39,10 +39,8 @@ const GUARANTEES = [
 ];
 
 const BRANCHES = [
-  { city: "Москва, Центр", addr: "ул. Тверская, 18, офис 301", metro: "Тверская", time: "10:00 — 21:00", phone: "+7 (495) 123-45-67" },
-  { city: "Москва, Юг", addr: "Варшавское шоссе, 87, ТЦ «Варшавский»", metro: "Варшавская", time: "10:00 — 21:00", phone: "+7 (495) 234-56-78" },
-  { city: "Москва, Север", addr: "Дмитровское шоссе, 51, ТЦ «Дмитровский»", metro: "Дмитровская", time: "10:00 — 20:00", phone: "+7 (495) 345-67-89" },
-  { city: "Подмосковье, Химки", addr: "ул. Ленинградская, 11", metro: "5 мин от ст. Химки", time: "10:00 — 20:00", phone: "+7 (495) 456-78-90" },
+  { city: "Филиал 1", addr: "ул. Кирова, 11", metro: "", time: "10:00 — 21:00", phone: "+7 (992) 999-03-33" },
+  { city: "Филиал 2", addr: "ул. Кирова, 7/47", metro: "", time: "10:00 — 21:00", phone: "8 (800) 600-68-33" },
 ];
 
 const Index = () => {
@@ -94,9 +92,9 @@ const Index = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <a href="tel:+74951234567" className="hidden md:flex items-center gap-2 text-[#FFD700] font-oswald font-semibold text-base hover:opacity-80 transition-opacity">
+            <a href="tel:+79929990333" className="hidden md:flex items-center gap-2 text-[#FFD700] font-oswald font-semibold text-base hover:opacity-80 transition-opacity">
               <Icon name="Phone" size={16} />
-              +7 (495) 123-45-67
+              +7 (992) 999-03-33
             </a>
             <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden p-2 text-white hover:text-[#FFD700]">
               <Icon name={menuOpen ? "X" : "Menu"} size={24} />
@@ -112,9 +110,9 @@ const Index = () => {
                 {l.label}
               </button>
             ))}
-            <a href="tel:+74951234567" className="flex items-center gap-2 mt-4 text-[#FFD700] font-oswald font-semibold text-lg">
+            <a href="tel:+79929990333" className="flex items-center gap-2 mt-4 text-[#FFD700] font-oswald font-semibold text-lg">
               <Icon name="Phone" size={16} />
-              +7 (495) 123-45-67
+              +7 (992) 999-03-33
             </a>
           </div>
         )}
@@ -441,7 +439,7 @@ const Index = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: "Phone", title: "Телефон", lines: ["+7 (495) 123-45-67", "Пн-Вс 10:00 — 21:00"], href: "tel:+74951234567" },
+              { icon: "Phone", title: "Телефон", lines: ["+7 (992) 999-03-33", "8 (800) 600-68-33 (бесплатно)"], href: "tel:+79929990333" },
               { icon: "MessageCircle", title: "WhatsApp / Telegram", lines: ["@skupka24", "Ответим за 5 минут"], href: "https://t.me/skupka24" },
               { icon: "Mail", title: "Email", lines: ["info@skupka24.ru", "Для деловых запросов"], href: "mailto:info@skupka24.ru" },
             ].map((c) => (
